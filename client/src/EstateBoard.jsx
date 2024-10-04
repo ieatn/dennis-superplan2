@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { Stage, Layer, Rect, Circle, Text, Group, Line } from 'react-konva';
+import React, { useState, useCallback } from 'react';
+import { Stage, Layer, Rect, Circle, Text, Group } from 'react-konva';
 import { AppBar, Toolbar, Button, Modal, Box, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import ArrowManager from './ArrowManager';
+import GridLines from './GridLines';
 
 const EstateBoard = () => {
   const GUIDE_LINE_OFFSET = 5;
@@ -19,11 +20,12 @@ const EstateBoard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [fromCircle, setFromCircle] = useState('');
   const [toCircle, setToCircle] = useState('');
-  const [gridLines, setGridLines] = useState([]);
+  const [gridGuides, setGridGuides] = useState([]);
 
   const stageRef = React.useRef(null);
 
-  const SNAP_THRESHOLD = 10; // Adjust this value to control snapping sensitivity
+  const SNAP_THRESHOLD = 20; // Adjust this value to control when snapping starts
+  const SNAP_STRENGTH = 3; // Adjust this value between 0 and 1 to control snapping strength
 
   const getStops = (draggedCircleId) => {
     const stage = stageRef.current;
@@ -111,38 +113,9 @@ const EstateBoard = () => {
     return guides;
   };
 
-  const drawLine = (guides, layer) => {
-    const lines = guides.map((lg, i) => {
-      if (lg.orientation === "H") {
-        return (
-          <Line
-            key={`h${i}`}
-            points={[-6000, 0, 6000, 0]}
-            stroke="rgb(0, 161, 255)"
-            strokeWidth={1}
-            dash={[4, 6]}
-            x={0}
-            y={lg.lineGuide}
-          />
-        );
-      } else if (lg.orientation === "V") {
-        return (
-          <Line
-            key={`v${i}`}
-            points={[0, -6000, 0, 6000]}
-            stroke="rgb(0, 161, 255)"
-            strokeWidth={1}
-            dash={[4, 6]}
-            x={lg.lineGuide}
-            y={0}
-          />
-        );
-      }
-      return null;
-    }).filter(Boolean);
-
-    setGridLines(lines);
-  };
+  const drawLine = useCallback((guides) => {
+    setGridGuides(guides);
+  }, []);
 
   const handleDragMove = (e, index) => {
     const draggedCircle = circles[index];
@@ -158,35 +131,42 @@ const EstateBoard = () => {
     const guides = getGuides(stops, bounds);
 
     let newPosition = { x: newX, y: newY };
-    let shouldSnap = false;
+    let shouldDrawGuides = false;
 
     if (guides.length > 0) {
       guides.forEach((lg) => {
-        if (lg.orientation === "H" && Math.abs(newY - (lg.lineGuide + lg.offset)) < SNAP_THRESHOLD) {
-          newPosition.y = lg.lineGuide + lg.offset;
-          shouldSnap = true;
-        } else if (lg.orientation === "V" && Math.abs(newX - (lg.lineGuide + lg.offset)) < SNAP_THRESHOLD) {
-          newPosition.x = lg.lineGuide + lg.offset;
-          shouldSnap = true;
+        if (lg.orientation === "H") {
+          const diff = newY - (lg.lineGuide + lg.offset);
+          if (Math.abs(diff) < SNAP_THRESHOLD) {
+            newPosition.y = newY - diff * SNAP_STRENGTH;
+            shouldDrawGuides = true;
+          }
+        } else if (lg.orientation === "V") {
+          const diff = newX - (lg.lineGuide + lg.offset);
+          if (Math.abs(diff) < SNAP_THRESHOLD) {
+            newPosition.x = newX - diff * SNAP_STRENGTH;
+            shouldDrawGuides = true;
+          }
         }
       });
 
-      if (shouldSnap) {
+      if (shouldDrawGuides) {
         drawLine(guides);
-        e.target.position(newPosition);
       } else {
-        setGridLines([]);
+        setGridGuides([]);
       }
     } else {
-      setGridLines([]);
+      setGridGuides([]);
     }
+
+    e.target.position(newPosition);
 
     // Update the circles state
     const newCircles = [...circles];
     newCircles[index] = {
       ...newCircles[index],
-      x: e.target.x(),
-      y: e.target.y(),
+      x: newPosition.x,
+      y: newPosition.y,
     };
     setCircles(newCircles);
 
@@ -206,7 +186,7 @@ const EstateBoard = () => {
   };
 
   const handleDragEnd = (e) => {
-    setGridLines([]);
+    setGridGuides([]);
   };
 
   const handleAddArrow = () => {
@@ -240,7 +220,7 @@ const EstateBoard = () => {
               strokeWidth={2}
             />
             <ArrowManager arrows={arrows} baseCircleRadius={baseCircleRadius} />
-            {gridLines}
+            <GridLines guides={gridGuides} />
             {circles.map((circle, index) => {
               const radius = baseCircleRadius * circle.size;
               return (
