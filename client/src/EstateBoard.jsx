@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { Stage, Layer, Rect, Circle, Text, Group } from 'react-konva';
-import { AppBar, Toolbar, Button, Modal, Box, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { AppBar, Toolbar, Button, Modal, Box, Select, MenuItem, FormControl, InputLabel, List, ListItem, ListItemText, IconButton } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowManager from './ArrowManager';
 import GridLines from './GridLines';
 
@@ -21,6 +22,7 @@ const EstateBoard = () => {
   const [fromCircle, setFromCircle] = useState('');
   const [toCircle, setToCircle] = useState('');
   const [gridGuides, setGridGuides] = useState([]);
+  const [modalMode, setModalMode] = useState('add'); // New state to track modal mode
 
   const stageRef = React.useRef(null);
 
@@ -193,19 +195,23 @@ const EstateBoard = () => {
     if (fromCircle && toCircle) {
       const from = circles.find(c => c.id === fromCircle);
       const to = circles.find(c => c.id === toCircle);
-      setArrows([...arrows, { from, to }]);
+      setArrows([...arrows, { id: Date.now(), from, to }]); // Add an id to each arrow
       setIsModalOpen(false);
       setFromCircle('');
       setToCircle('');
     }
   };
 
+  const handleRemoveArrow = (arrowId) => {
+    setArrows(arrows.filter(arrow => arrow.id !== arrowId));
+  };
+
   return (
     <>
       <AppBar position="static">
         <Toolbar variant="dense" sx={{ justifyContent: 'space-between', backgroundColor: '#3f51b5', borderRadius: '8px', padding: '8px' }}>
-          <Button variant="contained" color="primary" size="small" onClick={() => setIsModalOpen(true)} sx={{ borderRadius: '20px', margin: '0 4px' }}>Add Arrow</Button>
-          <Button variant="contained" color="secondary" size="small" onClick={() => console.log('Action 1')} sx={{ borderRadius: '20px', margin: '0 4px' }}>Action 1</Button>
+          <Button variant="contained" color="primary" size="small" onClick={() => { setModalMode('add'); setIsModalOpen(true); }} sx={{ borderRadius: '20px', margin: '0 4px' }}>Add Arrow</Button>
+          <Button variant="contained" color="secondary" size="small" onClick={() => { setModalMode('remove'); setIsModalOpen(true); }} sx={{ borderRadius: '20px', margin: '0 4px' }}>Remove Arrow</Button>
           <Button variant="contained" color="success" size="small" onClick={() => console.log('Action 2')} sx={{ borderRadius: '20px', margin: '0 4px' }}>Action 2</Button>
         </Toolbar>
       </AppBar>
@@ -266,29 +272,44 @@ const EstateBoard = () => {
           boxShadow: 24,
           p: 4,
         }}>
-          <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel>From</InputLabel>
-            <Select
-              value={fromCircle}
-              onChange={(e) => setFromCircle(e.target.value)}
-            >
-              {circles.map((circle) => (
-                <MenuItem key={circle.id} value={circle.id}>{circle.text}</MenuItem>
+          {modalMode === 'add' ? (
+            <>
+              <FormControl fullWidth sx={{ mb: 2 }}>
+                <InputLabel>From</InputLabel>
+                <Select
+                  value={fromCircle}
+                  onChange={(e) => setFromCircle(e.target.value)}
+                >
+                  {circles.map((circle) => (
+                    <MenuItem key={circle.id} value={circle.id}>{circle.text}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth sx={{ mb: 2 }}>
+                <InputLabel>To</InputLabel>
+                <Select
+                  value={toCircle}
+                  onChange={(e) => setToCircle(e.target.value)}
+                >
+                  {circles.map((circle) => (
+                    <MenuItem key={circle.id} value={circle.id}>{circle.text}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <Button onClick={handleAddArrow} variant="contained">Add Arrow</Button>
+            </>
+          ) : (
+            <List>
+              {arrows.map((arrow) => (
+                <ListItem key={arrow.id}>
+                  <ListItemText primary={`${arrow.from.text} → ${arrow.to.text}`} />
+                  <IconButton edge="end" aria-label="delete" onClick={() => handleRemoveArrow(arrow.id)}>
+                    <DeleteIcon />
+                  </IconButton>
+                </ListItem>
               ))}
-            </Select>
-          </FormControl>
-          <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel>To</InputLabel>
-            <Select
-              value={toCircle}
-              onChange={(e) => setToCircle(e.target.value)}
-            >
-              {circles.map((circle) => (
-                <MenuItem key={circle.id} value={circle.id}>{circle.text}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <Button onClick={handleAddArrow} variant="contained">Add Arrow</Button>
+            </List>
+          )}
         </Box>
       </Modal>
     </>
