@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Stage, Layer, Rect, Circle, Text, Group } from 'react-konva';
+import { Stage, Layer, Rect, Circle, Text, Group, Line } from 'react-konva';
 import { AppBar, Toolbar, Button, Modal, Box, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import ArrowManager from './ArrowManager';
 
 const EstateBoard = () => {
+  const GUIDE_LINE_OFFSET = 5;
   const stageWidth = window.innerWidth * 0.9;
   const stageHeight = window.innerHeight * 0.9;
   const baseCircleRadius = Math.min(stageWidth, stageHeight) * 0.08;
@@ -18,8 +19,169 @@ const EstateBoard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [fromCircle, setFromCircle] = useState('');
   const [toCircle, setToCircle] = useState('');
+  const [gridLines, setGridLines] = useState([]);
+
+  const stageRef = React.useRef(null);
+
+  const SNAP_THRESHOLD = 10; // Adjust this value to control snapping sensitivity
+
+  const getStops = (draggedCircleId) => {
+    const stage = stageRef.current;
+    const vertical = [0, stage.width() / 2, stage.width()];
+    const horizontal = [0, stage.height() / 2, stage.height()];
+
+    circles.forEach((circle) => {
+      if (circle.id !== draggedCircleId) {
+        const radius = baseCircleRadius * circle.size;
+        vertical.push(circle.x, circle.x + radius, circle.x - radius);
+        horizontal.push(circle.y, circle.y + radius, circle.y - radius);
+      }
+    });
+
+    return {
+      vertical: [...new Set(vertical)].sort((a, b) => a - b),
+      horizontal: [...new Set(horizontal)].sort((a, b) => a - b),
+    };
+  };
+
+  const getBounds = (circle) => {
+    const radius = baseCircleRadius * circle.size;
+    return {
+      vertical: [
+        { guide: circle.x - radius, snap: 'start', offset: -radius },
+        { guide: circle.x, snap: 'center', offset: 0 },
+        { guide: circle.x + radius, snap: 'end', offset: radius },
+      ],
+      horizontal: [
+        { guide: circle.y - radius, snap: 'start', offset: -radius },
+        { guide: circle.y, snap: 'center', offset: 0 },
+        { guide: circle.y + radius, snap: 'end', offset: radius },
+      ],
+    };
+  };
+
+  const getGuides = (stops, bounds) => {
+    const resultV = [];
+    const resultH = [];
+    stops.horizontal.forEach((lg) => {
+      bounds.horizontal.forEach((bound) => {
+        const diff = Math.abs(lg - bound.guide);
+        if (diff < GUIDE_LINE_OFFSET) {
+          resultH.push({
+            lineGuide: lg,
+            diff: diff,
+            snap: bound.snap,
+            offset: bound.offset,
+          });
+        }
+      });
+    });
+    stops.vertical.forEach((lg) => {
+      bounds.vertical.forEach((bound) => {
+        const diff = Math.abs(lg - bound.guide);
+        if (diff < GUIDE_LINE_OFFSET) {
+          resultV.push({
+            lineGuide: lg,
+            diff: diff,
+            snap: bound.snap,
+            offset: bound.offset,
+          });
+        }
+      });
+    });
+    const minH = resultH.sort((a, b) => a.diff - b.diff)[0];
+    const minV = resultV.sort((a, b) => a.diff - b.diff)[0];
+    const guides = [];
+    if (minH) {
+      guides.push({
+        lineGuide: minH.lineGuide,
+        offset: minH.offset,
+        orientation: "H",
+        snap: minH.snap,
+      });
+    }
+    if (minV) {
+      guides.push({
+        lineGuide: minV.lineGuide,
+        offset: minV.offset,
+        orientation: "V",
+        snap: minV.snap,
+      });
+    }
+    return guides;
+  };
+
+  const drawLine = (guides, layer) => {
+    const lines = guides.map((lg, i) => {
+      if (lg.orientation === "H") {
+        return (
+          <Line
+            key={`h${i}`}
+            points={[-6000, 0, 6000, 0]}
+            stroke="rgb(0, 161, 255)"
+            strokeWidth={1}
+            dash={[4, 6]}
+            x={0}
+            y={lg.lineGuide}
+          />
+        );
+      } else if (lg.orientation === "V") {
+        return (
+          <Line
+            key={`v${i}`}
+            points={[0, -6000, 0, 6000]}
+            stroke="rgb(0, 161, 255)"
+            strokeWidth={1}
+            dash={[4, 6]}
+            x={lg.lineGuide}
+            y={0}
+          />
+        );
+      }
+      return null;
+    }).filter(Boolean);
+
+    setGridLines(lines);
+  };
 
   const handleDragMove = (e, index) => {
+    const draggedCircle = circles[index];
+    const stage = e.target.getStage();
+    const layer = e.target.getLayer();
+    
+    // Get the new position of the dragged circle
+    const newX = e.target.x();
+    const newY = e.target.y();
+
+    const stops = getStops(draggedCircle.id);
+    const bounds = getBounds({ ...draggedCircle, x: newX, y: newY });
+    const guides = getGuides(stops, bounds);
+
+    let newPosition = { x: newX, y: newY };
+    let shouldSnap = false;
+
+    if (guides.length > 0) {
+      guides.forEach((lg) => {
+        if (lg.orientation === "H" && Math.abs(newY - (lg.lineGuide + lg.offset)) < SNAP_THRESHOLD) {
+          newPosition.y = lg.lineGuide + lg.offset;
+          shouldSnap = true;
+        } else if (lg.orientation === "V" && Math.abs(newX - (lg.lineGuide + lg.offset)) < SNAP_THRESHOLD) {
+          newPosition.x = lg.lineGuide + lg.offset;
+          shouldSnap = true;
+        }
+      });
+
+      if (shouldSnap) {
+        drawLine(guides);
+        e.target.position(newPosition);
+      } else {
+        setGridLines([]);
+      }
+    } else {
+      setGridLines([]);
+    }
+
+    // Update the circles state
     const newCircles = [...circles];
     newCircles[index] = {
       ...newCircles[index],
@@ -38,6 +200,13 @@ const EstateBoard = () => {
       return arrow;
     });
     setArrows(newArrows);
+
+    // Force update of the layer
+    layer.batchDraw();
+  };
+
+  const handleDragEnd = (e) => {
+    setGridLines([]);
   };
 
   const handleAddArrow = () => {
@@ -61,7 +230,7 @@ const EstateBoard = () => {
         </Toolbar>
       </AppBar>
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 'calc(100vh - 64px)' }}>
-        <Stage width={stageWidth} height={stageHeight}>
+        <Stage width={stageWidth} height={stageHeight} ref={stageRef}>
           <Layer>
             <Rect
               width={stageWidth}
@@ -71,15 +240,17 @@ const EstateBoard = () => {
               strokeWidth={2}
             />
             <ArrowManager arrows={arrows} baseCircleRadius={baseCircleRadius} />
+            {gridLines}
             {circles.map((circle, index) => {
               const radius = baseCircleRadius * circle.size;
               return (
                 <Group
-                  key={index}
+                  key={circle.id}
                   x={circle.x}
                   y={circle.y}
                   draggable
                   onDragMove={(e) => handleDragMove(e, index)}
+                  onDragEnd={handleDragEnd}
                 >
                   <Circle
                     radius={radius}
