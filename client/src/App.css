@@ -1,0 +1,56 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito&display=swap");
+
+/* ====================================
+   General Styles
+   ==================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+}
+
+/* ====================================
+   Utility Classes
+   ==================================== */
+.pt { padding-top: 3rem; }
+.p-0 { padding: 0; }
+.p-1 { padding: 0.25rem; }
+.p-2 { padding: 0.5rem; }
+.p-3 { padding: 0.75rem; }
+.p-4 { padding: 1rem; }
+.p-5 { padding: 1.25rem; }
+.p-6 { padding: 1.5rem; }
+.m-0 { margin: 0; }
+.m-1 { margin: 0.25rem; }
+.m-2 { margin: 0.5rem; }
+.m-3 { margin: 0.75rem; }
+.m-4 { margin: 1rem; }
+.m-5 { margin: 1.25rem; }
+.m-6 { margin: 1.5rem; }
+.text-center { text-align: center; }
+.overflow-hidden { overflow: hidden; }
+.border { border: 1px solid rgba(0, 0, 0, 0.12); } /* Material UI border color */
+.hidden { display: none; }
+.block { display: block; }
+
+/* ====================================
+   Flex Utility Classes
+   ==================================== */
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.justify-center { justify-content: center; }
+.items-center { align-items: center; }
+.mx-auto { margin: auto; }
+
+/* ====================================
+   Miscellaneous
+   ==================================== */
+
+/* ====================================
+   Layout
+   ==================================== */
