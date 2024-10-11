@@ -12,9 +12,12 @@ const EstateBoard = () => {
   const baseCircleRadius = Math.min(stageWidth, stageHeight) * 0.08;
 
   const [circles, setCircles] = useState([
-    { id: 1, x: stageWidth * 0.2, y: stageHeight * 0.2, color: 'red', text: 'Family', size: 1 },
-    { id: 2, x: stageWidth * 0.5, y: stageHeight * 0.5, color: 'blue', text: 'Business', size: 1.2 },
+    { id: 1, x: stageWidth * 0.2, y: stageHeight * 0.2, color: 'red', text: 'Family', size: 2 },
+    { id: 2, x: stageWidth * 0.5, y: stageHeight * 0.5, color: 'blue', text: 'Business', size: 1.6 },
     { id: 3, x: stageWidth * 0.8, y: stageHeight * 0.8, color: 'green', text: 'Cash', size: 0.8 },
+    { id: 4, x: stageWidth * 0.3, y: stageHeight * 0.7, color: 'purple', text: 'Investment', size: 1.4 },
+    { id: 5, x: stageWidth * 0.6, y: stageHeight * 0.3, color: 'orange', text: 'Real Estate', size: 0.9 },
+    { id: 6, x: stageWidth * 0.9, y: stageHeight * 0.2, color: 'yellow', text: 'Savings', size: 1 },
   ]);
 
   const [arrows, setArrows] = useState([]);

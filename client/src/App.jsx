@@ -24,11 +24,9 @@ export default function App() {
                     <Button color="inherit">Login</Button>
                 </Toolbar>
             </AppBar>
-            <Container maxWidth="md">
-                <Box sx={{ my: 4 }}>
-                    <Outlet />
-                </Box>
-            </Container>
+            <div>
+                <Outlet />
+            </div>
         </div>
     );
 }

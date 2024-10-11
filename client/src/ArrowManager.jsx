@@ -11,10 +11,10 @@ const ArrowManager = ({ arrows, baseCircleRadius }) => {
     const toRadius = baseCircleRadius * to.size;
     
     return [
-      from.x + fromRadius * Math.cos(angle),
-      from.y + fromRadius * Math.sin(angle),
-      to.x - toRadius * Math.cos(angle),
-      to.y - toRadius * Math.sin(angle)
+      from.x + fromRadius * Math.cos(angle) - 3,
+      from.y + fromRadius * Math.sin(angle) - 3,
+      to.x - toRadius * Math.cos(angle) + 5,
+      to.y - toRadius * Math.sin(angle) + 5
     ];
   };
 
@@ -24,11 +24,11 @@ const ArrowManager = ({ arrows, baseCircleRadius }) => {
         <Arrow
           key={index}
           points={calculateArrowPoints(arrow.from, arrow.to)}
-          pointerLength={20}
-          pointerWidth={20}
+          pointerLength={20} // Reduced size
+          pointerWidth={20}  // Reduced size
           fill="black"
           stroke="black"
-          strokeWidth={4}
+          strokeWidth={4}    // Reduced size
         />
       ))}
     </>

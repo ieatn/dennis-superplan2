@@ -3,12 +3,17 @@ import { useParams, useLocation, Link } from 'react-router-dom';
 import { Container, Typography, Paper, Fab, Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid } from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
 import FolderIcon from '@mui/icons-material/Folder';
+import { API_URL } from './config.jsx';
+
+
 
 const Client = () => {
   const { id } = useParams();
   const location = useLocation();
   const { name } = location.state || {};
   const [chatOpen, setChatOpen] = useState(false);
+
+  // import folders from clients, dyanmic render 
 
   const handleChatOpen = () => {
     setChatOpen(true);
@@ -26,6 +31,7 @@ const Client = () => {
           <Paper
             component={Link}
             to="/networthboard"
+            state={{ clientId: id }}
             sx={{
               display: 'flex',
               flexDirection: 'column',
@@ -43,6 +49,7 @@ const Client = () => {
           <Paper
             component={Link}
             to="/networthboard"
+            state={{ clientId: id }}
             sx={{
               display: 'flex',
               flexDirection: 'column',
