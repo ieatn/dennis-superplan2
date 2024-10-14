@@ -7,6 +7,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  list-style: none;
 }
 
 html, body, #root {
@@ -60,3 +61,12 @@ html, body, #root {
    width: 100vw;
    border: 10px solid red;
 } */
+
+.nwb-transition-box {
+  transition: width 0.2s ease, opacity 0.2s ease;
+  overflow: hidden;
+}
+
+.nwb-grow-box {
+  flex-grow: 1;
+}

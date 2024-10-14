@@ -1,68 +1,64 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
 import { Container, Typography, Paper, Fab, Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid } from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
 import FolderIcon from '@mui/icons-material/Folder';
 import { API_URL } from './config.jsx';
-
-
+import './App.css';
 
 const Client = () => {
   const { id } = useParams();
   const location = useLocation();
   const { name } = location.state || {};
   const [chatOpen, setChatOpen] = useState(false);
+  const [folders, setFolders] = useState([]);
+  
 
-  // import folders from clients, dyanmic render 
+  // import folders from clients, dynamic render 
+  useEffect(() => {
+    const fetchFolders = async (client_id) => {
+      try {
+        const res = await fetch(
+          `${API_URL}/fetch_folders/${client_id}`
+        );
+        const data = await res.json();
+        setFolders(data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchFolders(id);
+  }, [id]);
 
   const handleChatOpen = () => {
     setChatOpen(true);
   };
 
-  const handleChatClose = () => {
-    setChatOpen(false);
-  };
-
   return (
     <Container sx={{ mt: 4 }}>
-      {/* Replace NetWorthBoard button with two folders */}
+      {/* Render folders dynamically */}
       <Grid container spacing={2} sx={{ mb: 2 }}>
-        <Grid item xs={6}>
-          <Paper
-            component={Link}
-            to="/networthboard"
-            state={{ clientId: id }}
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              padding: 2,
-              textDecoration: 'none',
-              color: 'inherit',
-            }}
-          >
-            <FolderIcon sx={{ fontSize: 48, color: 'primary.main' }} />
-            <Typography variant="subtitle1">2023</Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={6}>
-          <Paper
-            component={Link}
-            to="/networthboard"
-            state={{ clientId: id }}
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              padding: 2,
-              textDecoration: 'none',
-              color: 'inherit',
-            }}
-          >
-            <FolderIcon sx={{ fontSize: 48, color: 'primary.main' }} />
-            <Typography variant="subtitle1">2024</Typography>
-          </Paper>
-        </Grid>
+        {folders.map((folder) => (
+          <Grid item xs={6} key={folder.folder_id}>
+            <Paper
+              component={Link}
+              to="/networthboard"
+              state={{ clientId: id, folder: folder }}
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                padding: 2,
+                textDecoration: 'none',
+                color: 'inherit',
+              }}
+            >
+              <FolderIcon sx={{ fontSize: 48, color: 'primary.main' }} />
+              <Typography variant="subtitle1">{folder.folder_name}</Typography>
+            </Paper>
+          </Grid>
+        ))}
       </Grid>
 
       <Typography variant="h4" component="h2" gutterBottom>
@@ -89,14 +85,14 @@ const Client = () => {
       </Fab>
 
       {/* Chatbot Dialog */}
-      <Dialog open={chatOpen} onClose={handleChatClose}>
+      <Dialog open={chatOpen} onClose={() => setChatOpen(false)}>
         <DialogTitle>Chat with us</DialogTitle>
         <DialogContent>
           {/* Add your chatbot content here */}
           <Typography>This is where your chatbot interface would go.</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleChatClose}>Close</Button>
+          <Button onClick={() => setChatOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
     </Container>
