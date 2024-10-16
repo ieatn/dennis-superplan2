@@ -1,6 +1,7 @@
 .treeRoot {
   height: 250px;
   overflow: auto;
+  position: relative;
 }
 
 .treeRoot::-webkit-scrollbar {

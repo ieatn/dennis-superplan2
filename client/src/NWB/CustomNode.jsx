@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { TypeIcon } from "./TypeIcon";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
@@ -7,7 +7,7 @@ import { IconButton } from "@mui/material";
 
 export const CustomNode = (props) => {
   const { droppable, data } = props.node;
-  const indent = props.depth * 36;
+  const [childNodes, setChildNodes] = useState([]);
 
   const handleToggle = (e) => {
     e.stopPropagation();
@@ -17,6 +17,17 @@ export const CustomNode = (props) => {
   const handleDelete = (e) => {
     e.stopPropagation();
     props.deleteFolder(props.node.id);
+  };
+
+  const formatLargeNumber = (number) => {
+    if (Math.abs(number) >= 1e6) {
+      const formattedNumber = Math.floor((number / 1e6) * 10) / 10; // Round down to 1 decimal place
+      return `${formattedNumber}M`;
+    } else if (Math.abs(number) >= 1e3) {
+      const formattedNumber = Math.floor((number / 1e3) * 10) / 10; // Round down to 1 decimal place
+      return `${formattedNumber}K`;
+    }
+    return number.toLocaleString();
   };
 
   // this file is just for each individual node
@@ -65,7 +76,7 @@ export const CustomNode = (props) => {
     // width: '1.5rem',
     // height: '1.5rem',
     transition: 'transform 0.3s ease',
-    transform: props.isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+    transform: props.isOpen ? 'rotate(0deg)' : 'rotate(90deg)',
   };
 
   const contentStyle = {
@@ -100,12 +111,12 @@ export const CustomNode = (props) => {
 
   return (
     <div
-      style={{ ...rootStyle, paddingInlineStart: indent }}
+      style={{ ...rootStyle, paddingInlineStart: props.depth * 36 }} 
     >
       <div className="node-content" style={containerStyle}>
         {props.node.id !== props.rootId && droppable && (
           <div className="expand-icon" onClick={handleToggle} style={toggleIconStyle}>
-            {props.isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            {props.isOpen ? <ExpandMoreIcon /> : <ExpandLessIcon />}
           </div>
         )}
         <div className="type-icon" style={filetypeStyle}>
@@ -125,6 +136,13 @@ export const CustomNode = (props) => {
             {data.value}
           </div>
         )}
+        <span style={{ color: props.rootId === 400 ? 'red' : props.rootId === 200 ? 'green' : 'inherit', position: 'absolute', left: '50%' }}>
+          {props.rootId === 300 || props.rootId === 400
+            ? formatLargeNumber(props.node.liability)
+            : props.node.droppable
+            ? ""
+            : formatLargeNumber(props.node.value)}
+        </span>
       </div>
     </div>
   );
