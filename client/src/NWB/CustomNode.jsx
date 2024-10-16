@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { API_URL } from "../config";
 import { TypeIcon } from "./TypeIcon";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
@@ -7,7 +9,7 @@ import { IconButton } from "@mui/material";
 
 export const CustomNode = (props) => {
   const { droppable, data } = props.node;
-  const [childNodes, setChildNodes] = useState([]);
+  const [folderTotal, setFolderTotal] = useState(0);
 
   const handleToggle = (e) => {
     e.stopPropagation();
@@ -109,6 +111,29 @@ export const CustomNode = (props) => {
     color: '#ef4444',
   };
 
+  useEffect(() => {
+    if (droppable) {
+      const total = calculateFolderTotal(props.node.id);
+      setFolderTotal(total);
+    }
+  }, [props.treeData, props.node.id, droppable]);
+
+  // also works for multiple nested folders thats really cool power of recursion
+  const calculateFolderTotal = (folderId) => {
+    return props.treeData.reduce((sum, node) => {
+      if (node.parent === folderId) {
+        if (node.droppable) {
+          // Recursively calculate total for nested folders
+          return sum + calculateFolderTotal(node.id);
+        } else {
+          // For assets and liabilities, use the appropriate property
+          return sum + (props.rootId === 400 ? (node.liability || 0) : (node.value || 0));
+        }
+      }
+      return sum;
+    }, 0);
+  };
+
   return (
     <div
       style={{ ...rootStyle, paddingInlineStart: props.depth * 36 }} 
@@ -143,6 +168,11 @@ export const CustomNode = (props) => {
             ? ""
             : formatLargeNumber(props.node.value)}
         </span>
+        {droppable && (
+          <span style={{ marginLeft: 'auto', color: props.rootId === 400 ? 'red' : props.rootId === 200 ? 'green' : '#4a5568', position: 'absolute', left: '50%' }}>
+            {formatLargeNumber(folderTotal)}
+          </span>
+        )}
       </div>
     </div>
   );

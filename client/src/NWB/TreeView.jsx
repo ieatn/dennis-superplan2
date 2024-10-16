@@ -18,6 +18,10 @@ export const TreeView = (props) => (
         {...options}
         rootId={props.rootId}
         deleteFolder={props.deleteFolder}
+        treeData={props.treeData}
+        // depth={depth}
+        // isOpen={isOpen}
+        // onToggle={onToggle}
       />
     )}
     dragPreviewRender={(monitorProps) => (

@@ -84,13 +84,19 @@ const NetWorthBoard = () => {
     }
   };
   const calculateValuesAndLiabilities = () => {
-    const totalValue = treeData
-      .filter((node) => node.parent === 200)
-      .reduce((accumulator, node) => accumulator + node.value, 0);
+    const calculateTotal = (parentId) => {
+      return treeData
+        .filter((node) => node.parent === parentId)
+        .reduce((accumulator, node) => {
+          if (node.droppable) {
+            return accumulator + calculateTotal(node.id);
+          }
+          return accumulator + (parentId === 400 ? node.liability : node.value);
+        }, 0);
+    };
 
-    const totalLiability = treeData
-      .filter((node) => node.parent === 400)
-      .reduce((accumulator, node) => accumulator + node.liability, 0);
+    const totalValue = calculateTotal(200);
+    const totalLiability = calculateTotal(400);
 
     setAssetValues(formatLargeNumber(totalValue));
     setLiabilities(formatLargeNumber(totalLiability));
@@ -391,13 +397,19 @@ const NetWorthBoard = () => {
           }}>
             <Paper sx={{ padding: 2 }} className="custom-scrollbar">
               <Typography variant="h6">Assets Bank</Typography>
-              <TreeView tree={tree1} onDrop={handleDrop} rootId={100} deleteFolder={deleteFolder} />
+              <TreeView tree={tree1} onDrop={handleDrop} rootId={100} deleteFolder={deleteFolder} treeData={treeData} />
             </Paper>
           </Box>
           <Box className="nwb-grow-box">
             <Paper sx={{ padding: 2 }}>
               <Typography variant="h6">Assets</Typography>
-              <TreeView tree={tree2} onDrop={handleDrop} rootId={200} deleteFolder={deleteFolder} />
+              <TreeView 
+                tree={tree2} 
+                onDrop={handleDrop} 
+                rootId={200} 
+                deleteFolder={deleteFolder} 
+                treeData={treeData}
+              />
             </Paper>
           </Box>
         </Box>
@@ -412,13 +424,13 @@ const NetWorthBoard = () => {
           }}>
             <Paper sx={{ padding: 2 }}  >
               <Typography variant="h6">Liabilities Bank</Typography>
-              <TreeView tree={tree3} onDrop={handleDrop} rootId={300} deleteFolder={deleteFolder} />
+              <TreeView tree={tree3} onDrop={handleDrop} rootId={300} deleteFolder={deleteFolder} treeData={treeData} />
             </Paper>
           </Box>
           <Box className="nwb-grow-box">
             <Paper sx={{ padding: 2 }}>
               <Typography variant="h6">Liabilities</Typography>
-              <TreeView tree={tree4} onDrop={handleDrop} rootId={400} deleteFolder={deleteFolder} />
+              <TreeView tree={tree4} onDrop={handleDrop} rootId={400} deleteFolder={deleteFolder} treeData={treeData} />
             </Paper>
           </Box>
         </Box>
