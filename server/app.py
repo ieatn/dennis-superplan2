@@ -159,27 +159,43 @@ def get_results():
 @app.route('/submit_questionnaire', methods=['POST'])
 def submit_questionnaire():
     data = request.json
+    print('Received data:', data)  # Log the received data
 
-    client_id = data.get('client_id')
-    question1 = json.dumps(data.get('question1', []))
-    question2 = json.dumps(data.get('question2', []))
-    question3 = json.dumps(data.get('question3', []))
-    question4 = json.dumps(data.get('question4', []))
-    question5 = json.dumps(data.get('question5', []))
-    question6 = json.dumps(data.get('question6', []))
+    client_id = data.get('clientId')  # Change this to 'clientId'
+    if client_id is None:
+        return jsonify({'error': 'client_id is required'}), 400
 
+    # Check if the client_id already exists
     with connection_pool.get_connection() as conn:
         with conn.cursor() as cursor:
-            # Insert data
-            cursor.execute("""
-                INSERT INTO client_questionnaire (client_id, question1, question2, question3, question4, question5, question6)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """, (client_id, question1, question2, question3, question4, question5, question6))
+            cursor.execute("SELECT COUNT(*) FROM client_questionnaire WHERE client_id = %s", (client_id,))
+            exists = cursor.fetchone()[0] > 0
 
-            conn.commit()
+    if exists:
+        # Call the update function if client_id exists
+        return update_data()  # Call the update function directly
+    else:
+        # Access questionnaire data correctly
+        questionnaire_data = data.get('questionnaireData', {})
+        question1 = json.dumps(questionnaire_data.get('question1', []))
+        question2 = json.dumps(questionnaire_data.get('question2', []))
+        question3 = json.dumps(questionnaire_data.get('question3', []))
+        question4 = json.dumps(questionnaire_data.get('question4', []))
+        question5 = json.dumps(questionnaire_data.get('question5', []))
+        question6 = json.dumps(questionnaire_data.get('question6', []))
 
-    app.logger.info("Data inserted successfully")
-    return jsonify({'status': 'success'}), 200
+        with connection_pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                # Insert data
+                cursor.execute(""" 
+                    INSERT INTO client_questionnaire (client_id, question1, question2, question3, question4, question5, question6)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """, (client_id, question1, question2, question3, question4, question5, question6))
+
+                conn.commit()
+
+        app.logger.info("Data inserted successfully")
+        return jsonify({'status': 'success'}), 200
 
 @app.route('/delete_data', methods=['DELETE'])
 def delete_data():

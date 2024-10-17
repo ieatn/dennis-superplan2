@@ -28,6 +28,7 @@ export default function Questionnaire() {
     // Set clientId into questionnaireData immediately
     setQuestionnaireData(prevData => ({ ...prevData, clientId }));
     fetchData(clientId);
+    console.log('step', activeStep);
   }, [clientId, setQuestionnaireData]);
 
 
@@ -58,42 +59,41 @@ export default function Questionnaire() {
       const response = await axios.get(`${API_URL}/get_results?client_id=${clientId}`);
       const data = response.data[0];
       console.log('data', data);
-      // const questionMappings = [
-      //   { key: 'question1', defaultValue: [] },
-      //   { key: 'question2', defaultValue: [] },
-      //   { key: 'question3', defaultValue: [] },
-      //   { key: 'question4', defaultValue: [] },
-      //   { key: 'question5', defaultValue: [] },
-      //   { key: 'question6', defaultValue: [] },
-      //   { key: 'question7', defaultValue: [] },
-      // ];
-      // let newData = { ...data };
-      // questionMappings.forEach(({ key, defaultValue }) => {
-      //   const value = data[key];
-      //   if (value) {
-      //     try {
-      //       const parsedValue = JSON.parse(JSON.parse(value));
-      //       newData = { ...newData, [key]: parsedValue };
-      //     } catch (e) {
-      //       console.error(`Error parsing data for ${key}:`, e);
-      //       newData = { ...newData, [key]: defaultValue };
-      //     }
-      //   } else {
-      //     newData = { ...newData, [key]: defaultValue };
-      //   }
-      // });
+      
+      // Process and set the fetched data
+      const questionMappings = [
+        { key: 'question1', defaultValue: [] },
+        { key: 'question2', defaultValue: [] },
+        { key: 'question3', defaultValue: [] },
+        { key: 'question4', defaultValue: [] },
+        { key: 'question5', defaultValue: [] },
+        { key: 'question6', defaultValue: [] },
+        { key: 'question7', defaultValue: [] },
+      ];
+      let newData = { ...data };
+      questionMappings.forEach(({ key, defaultValue }) => {
+        const value = data[key];
+        if (value) {
+          try {
+            const parsedValue = JSON.parse(value);
+            newData = { ...newData, [key]: parsedValue };
+          } catch (e) {
+            console.error(`Error parsing data for ${key}:`, e);
+            newData = { ...newData, [key]: defaultValue };
+          }
+        } else {
+          newData = { ...newData, [key]: defaultValue };
+        }
+      });
 
-      // setQuestionnaireData(prevData => ({ ...prevData, ...newData }));
+      setQuestionnaireData(prevData => ({ ...prevData, ...newData }));
 
-      // // Check if all questions have been answered
-      // const allAnswered = questions.every(q => newData[q.key] && newData[q.key].length > 0);
-      // if (allAnswered) {
-      //   setIsComplete(true);
-      // } else {
-      //   // Find the first unanswered question
-      //   const firstUnansweredIndex = questions.findIndex(q => !newData[q.key] || newData[q.key].length === 0);
-      //   setActiveStep(firstUnansweredIndex >= 0 ? firstUnansweredIndex : 0);
-      // }
+      // Check if all questions have been answered
+      const allAnswered = questions.every(q => newData[q.key] && newData[q.key].length > 0);
+      if (allAnswered) {
+        setIsComplete(true);
+        setActiveStep(questions.length - 1); // Set to the last step if all are answered
+      }
 
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -160,18 +160,31 @@ export default function Questionnaire() {
   };
 
   const handleSubmit = async () => {
-    try {
-      await axios.post(`${API_URL}/submit_questionnaire`, {
-        clientId,
+    // Log the clientId and questionnaireData to check their values
+    console.log('Client ID before submission:', clientId);
+    console.log('Questionnaire Data before submission:', questionnaireData);
+
+    // Check if clientId is valid before submission
+    if (!clientId) {
+        console.error('clientId is required');
+        return; // Prevent submission if clientId is not available
+    }
+
+    const submissionData = {
+        clientId, // Ensure clientId is included
         questionnaireData
-      });
-      console.log('questionnaireData', questionnaireData);
-      // Navigate back to the client route
-      navigate(`/clients/${clientId}`);
+    };
+
+    console.log('Submitting data:', submissionData); // Log the data being submitted
+
+    try {
+        const response = await axios.post(`${API_URL}/submit_questionnaire`, submissionData);
+        console.log('Response from server:', response.data); // Log the server response
+        // Navigate back to the client route
+        navigate(`/clients/${clientId}`);
     } catch (error) {
-      console.error('Error submitting questionnaire:', error);
-      // Show an error message to the user
-      // You might want to add some state to display this error in the UI
+        console.error('Error submitting questionnaire:', error);
+        // Show an error message to the user
     }
   };
 
@@ -224,7 +237,7 @@ export default function Questionnaire() {
   };
 
   const renderSummary = () => (
-    <Paper elevation={3} sx={{ p: 3, mt: 2 }}>
+    <Paper elevation={3} sx={{ p: 3, mt: 2, maxHeight: '600px', overflowY: 'auto' }}>
       <Typography variant="h6" gutterBottom>Summary</Typography>
       <List>
         {questions.map((q) => (
