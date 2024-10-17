@@ -4,7 +4,6 @@ import { Container, Typography, Paper, Fab, Dialog, DialogTitle, DialogContent, 
 import ChatIcon from '@mui/icons-material/Chat';
 import FolderIcon from '@mui/icons-material/Folder';
 import { API_URL } from './config.jsx';
-import './App.css';
 
 const Client = () => {
   const { id } = useParams();
@@ -68,6 +67,11 @@ const Client = () => {
         <Typography variant="h6">Client ID: {id}</Typography>
         <Typography>Name: {name || 'Unknown'}</Typography>
         {/* Add more client details as needed */}
+        <Link to={`/card-game-board`} state={{ clientId: id }}>
+          <Button variant="contained" color="primary">
+            Card Game
+          </Button>
+        </Link>
       </Paper>
 
       {/* Chatbot Fab Button */}
