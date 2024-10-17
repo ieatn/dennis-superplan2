@@ -5,7 +5,7 @@ import Blogs from "./Blogs";
 import EstateBoard from "./EstateBoard"; // Added EstateBoard import
 import NetWorthBoard from "./NetWorthBoard"; // Added NetWorthBoard import
 import CardGameBoard from "./CardGameBoard"; // Added CardGameBoard import
-
+import Questionnaire from "./Questionnaire"; // Added Questionnaire import
 const routes = [
   {
     path: "/",
@@ -38,6 +38,10 @@ const routes = [
       {
         path: "card-game-board", // Added CardGameBoard route
         element: <CardGameBoard />,
+      },
+      {
+        path: "questionnaire", // Added Questionnaire route
+        element: <Questionnaire />,
       },
     ],
   },

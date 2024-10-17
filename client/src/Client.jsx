@@ -72,6 +72,11 @@ const Client = () => {
             Card Game
           </Button>
         </Link>
+        <Link to={`/questionnaire`} state={{ clientId: id }}>
+          <Button variant="contained" color="primary">
+            Questionnaire
+          </Button>
+        </Link>
       </Paper>
 
       {/* Chatbot Fab Button */}

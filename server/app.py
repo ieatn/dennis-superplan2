@@ -156,8 +156,8 @@ def get_results():
 
     return jsonify(results), 200
 
-@app.route('/insert_data', methods=['POST'])
-def insert_data():
+@app.route('/submit_questionnaire', methods=['POST'])
+def submit_questionnaire():
     data = request.json
 
     client_id = data.get('client_id')
