@@ -28,7 +28,6 @@ export default function Questionnaire() {
     // Set clientId into questionnaireData immediately
     setQuestionnaireData(prevData => ({ ...prevData, clientId }));
     fetchData(clientId);
-    console.log('step', activeStep);
   }, [clientId, setQuestionnaireData]);
 
 
@@ -58,7 +57,6 @@ export default function Questionnaire() {
     try {
       const response = await axios.get(`${API_URL}/get_results?client_id=${clientId}`);
       const data = response.data[0];
-      console.log('data', data);
       
       // Process and set the fetched data
       const questionMappings = [
@@ -160,10 +158,6 @@ export default function Questionnaire() {
   };
 
   const handleSubmit = async () => {
-    // Log the clientId and questionnaireData to check their values
-    console.log('Client ID before submission:', clientId);
-    console.log('Questionnaire Data before submission:', questionnaireData);
-
     // Check if clientId is valid before submission
     if (!clientId) {
         console.error('clientId is required');
@@ -175,11 +169,8 @@ export default function Questionnaire() {
         questionnaireData
     };
 
-    console.log('Submitting data:', submissionData); // Log the data being submitted
-
     try {
         const response = await axios.post(`${API_URL}/submit_questionnaire`, submissionData);
-        console.log('Response from server:', response.data); // Log the server response
         // Navigate back to the client route
         navigate(`/clients/${clientId}`);
     } catch (error) {
@@ -236,6 +227,33 @@ export default function Questionnaire() {
     }
   };
 
+  const handleDelete = async () => {
+    try {
+        const response = await axios.delete(`${API_URL}/delete_data?client_id=${clientId}`);
+        
+        // Clear the form by resetting questionnaireData
+        setQuestionnaireData({
+            clientId: clientId, // Retain clientId if needed
+            question1: [],
+            question2: [],
+            question3: [],
+            question4: [],
+            question5: [],
+            question6: [],
+            question7: ''
+        });
+
+        // Reset active step to 0 (first step)
+        setActiveStep(0);
+        
+        // Reset completion state
+        setIsComplete(false); // Ensure summary box does not show up
+        
+    } catch (error) {
+        console.error('Error deleting data:', error);
+    }
+  };
+
   const renderSummary = () => (
     <Paper elevation={3} sx={{ p: 3, mt: 2, maxHeight: '600px', overflowY: 'auto' }}>
       <Typography variant="h6" gutterBottom>Summary</Typography>
@@ -253,6 +271,9 @@ export default function Questionnaire() {
           </ListItem>
         ))}
       </List>
+      <Button variant="outlined" color="secondary" onClick={handleDelete}>
+        Delete
+      </Button>
     </Paper>
   );
 
@@ -280,7 +301,7 @@ export default function Questionnaire() {
             )}
           </CardContent>
         </Card>
-        <Box sx={{ position: 'fixed', bottom: 80, left: '50%', transform: 'translateX(-50%)', display: 'flex', justifyContent: 'space-between', width: '40%', height: '36px' }}>
+        <Box sx={{ position: 'fixed', bottom: 60, left: '50%', transform: 'translateX(-50%)', display: 'flex', justifyContent: 'space-between', width: '40%', height: '36px' }}>
           <Button
             variant="outlined"
             color="primary"

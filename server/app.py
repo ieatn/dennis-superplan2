@@ -173,7 +173,7 @@ def submit_questionnaire():
 
     if exists:
         # Call the update function if client_id exists
-        return update_data()  # Call the update function directly
+        return update_data(data)  # Pass the data to the update function
     else:
         # Access questionnaire data correctly
         questionnaire_data = data.get('questionnaireData', {})
@@ -214,9 +214,8 @@ def delete_data():
     return jsonify({'status': 'success', 'message': f'Deleted data for client_id {client_id}'}), 200
 
 @app.route('/update_data', methods=['PUT'])
-def update_data():
-    data = request.get_json()  # Assuming data is sent as JSON from frontend
-    client_id = data.get('client_id')
+def update_data(data):  # Accept data as a parameter
+    client_id = data.get('clientId')  # Change to 'clientId'
     
     if not client_id:
         return jsonify({"error": "client_id is required"}), 400
@@ -231,12 +230,13 @@ def update_data():
                 return jsonify({"error": "client_id not found"}), 404
             
             # Use existing data for fields not provided in the incoming request
-            question1 = json.dumps(data.get('question1', json.loads(existing_data['question1'])))
-            question2 = json.dumps(data.get('question2', json.loads(existing_data['question2'])))
-            question3 = json.dumps(data.get('question3', json.loads(existing_data['question3'])))
-            question4 = json.dumps(data.get('question4', json.loads(existing_data['question4'])))
-            question5 = json.dumps(data.get('question5', json.loads(existing_data['question5'])))
-            question6 = json.dumps(data.get('question6', json.loads(existing_data['question6'])))
+            questionnaire_data = data.get('questionnaireData', {})
+            question1 = json.dumps(questionnaire_data.get('question1', json.loads(existing_data['question1'])))
+            question2 = json.dumps(questionnaire_data.get('question2', json.loads(existing_data['question2'])))
+            question3 = json.dumps(questionnaire_data.get('question3', json.loads(existing_data['question3'])))
+            question4 = json.dumps(questionnaire_data.get('question4', json.loads(existing_data['question4'])))
+            question5 = json.dumps(questionnaire_data.get('question5', json.loads(existing_data['question5'])))
+            question6 = json.dumps(questionnaire_data.get('question6', json.loads(existing_data['question6'])))
             
             # Construct SQL query
             update_query = """
