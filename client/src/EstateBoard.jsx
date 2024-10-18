@@ -4,8 +4,12 @@ import { AppBar, Toolbar, Button, Modal, Box, Select, MenuItem, FormControl, Inp
 import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowManager from './ArrowManager';
 import GridLines from './GridLines';
+import { useNavigate, useLocation } from 'react-router-dom'; // Import useNavigate and useLocation
 
 const EstateBoard = () => {
+  const navigate = useNavigate(); // Initialize useNavigate
+  const location = useLocation(); // Initialize useLocation
+  const { clientId, folder } = location.state || {}; // Get clientId and folder from location state
   const GUIDE_LINE_OFFSET = 5;
   const stageWidth = window.innerWidth * 0.9;
   const stageHeight = window.innerHeight * 0.9;
@@ -209,15 +213,37 @@ const EstateBoard = () => {
     setArrows(arrows.filter(arrow => arrow.id !== arrowId));
   };
 
+  const handleBackToNetWorth = () => {
+    navigate('/networthboard', { state: { clientId, folder } });
+  };
+
   return (
     <>
       <AppBar position="static">
-        <Toolbar variant="dense" sx={{ justifyContent: 'space-between', backgroundColor: '#3f51b5', borderRadius: '8px', padding: '8px' }}>
+        <Toolbar variant="dense" sx={{ justifyContent: 'space-around', backgroundColor: '#3f51b5', borderRadius: '8px', padding: '8px' }}>
+          <Button 
+            variant="contained" 
+            color="success" 
+            size="small" 
+            onClick={handleBackToNetWorth}
+            sx={{ borderRadius: '20px', margin: '0 4px' }}
+          >
+            Back to Net Worth Board
+          </Button>
           <Button variant="contained" color="primary" size="small" onClick={() => { setModalMode('add'); setIsModalOpen(true); }} sx={{ borderRadius: '20px', margin: '0 4px' }}>Add Arrow</Button>
           <Button variant="contained" color="secondary" size="small" onClick={() => { setModalMode('remove'); setIsModalOpen(true); }} sx={{ borderRadius: '20px', margin: '0 4px' }}>Remove Arrow</Button>
-          <Button variant="contained" color="success" size="small" onClick={() => console.log('Action 2')} sx={{ borderRadius: '20px', margin: '0 4px' }}>Action 2</Button>
+          <Button variant="contained" color="warning" size="small" onClick={() => console.log('Action 2')} sx={{ borderRadius: '20px', margin: '0 4px' }}>Action 2</Button>
+          <Button variant="contained" color="error" size="small" onClick={() => console.log('Action 3')} sx={{ borderRadius: '20px', margin: '0 4px' }}>Action 3</Button>
         </Toolbar>
       </AppBar>
+
+
+
+
+
+
+
+
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 'calc(100vh - 64px)' }}>
         <Stage width={stageWidth} height={stageHeight} ref={stageRef}>
           <Layer>

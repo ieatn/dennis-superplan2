@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Select, MenuItem, Paper, Typography } from '@mui/material';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { getDescendants } from "@minoru/react-dnd-treeview";
 import { TreeView } from "./NWB/TreeView";
 import axios from "axios";
@@ -9,6 +9,7 @@ import "./App.css";
 import ReplayIcon from '@mui/icons-material/Replay';
 
 const NetWorthBoard = () => {
+  const navigate = useNavigate();
   let { state } = useLocation();
   const { clientId, folder } = state;
 
@@ -297,21 +298,28 @@ const NetWorthBoard = () => {
     );
   };
 
+  const handleGoToEstateBoard = () => {
+    navigate('/estateboard', { state: { clientId, folder } });
+  };
+
   return (
     // Main Net Worth Board Box full screen
     <Box sx={{
       // backgroundColor: 'red',
-      width: '100vw',
-      // Adjust height to account for the navbar
-      height: 'calc(100vh - 64px)', 
+      // width: '100vw',
+      // height: 'calc(100vh - 64px)', 
       // display: 'flex',
       // flexDirection: 'column',
       backgroundColor: '#f0f0f0', // Light gray background
-      padding: 3,
+      padding: 4,
     }}>
 
+
+
+      {/* TOP BAR */}
+
       {/* Buttons Container */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4 }}>
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Button
             variant="contained"
@@ -328,9 +336,6 @@ const NetWorthBoard = () => {
             Reset
           </Button>
         </Box>
-
-
-
 
         {/* SCENARIO SELECT */}
         <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2 }}>
@@ -352,8 +357,6 @@ const NetWorthBoard = () => {
           </Button>
           <Button variant="contained" color="error" sx={{ height: 40 }} onClick={deleteScenario}>Delete</Button>
         </Box>
-
-
 
         <Dialog open={openModal} onClose={handleCloseModal}>
           <DialogTitle>{isUpdating ? 'Update Scenario' : 'Save Scenario'}</DialogTitle>
@@ -382,50 +385,76 @@ const NetWorthBoard = () => {
           </DialogActions>
         </Dialog>
 
-
         <Button
             variant="contained"
             sx={{ backgroundColor: '#4caf50', color: '#ffffff' }} // Change button color
-            component={Link}
-            to={`/estateboard`}
+            onClick={handleGoToEstateBoard}
           >
             Go to Estate Board
           </Button>
       </Box>
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      {/* GRID */}
       <Box sx={{ display: 'flex', flexDirection: 'column' }} > 
+
+
+
+
+
+
+
+
+
         
+        {/* TOP BOXES */}
         <Box sx={{ display: 'flex', flexDirection: 'row', marginBottom: 2 }}>
 
+          {/* BOX 1 */}
           <Box className={`nwb-transition-box ${showLeftBoxes ? 'nwb-box' : ''}`} sx={{ 
             opacity: showLeftBoxes ? 1 : 0,
             width: showLeftBoxes ? '50%' : '0%',
             marginRight: showLeftBoxes ? 2 : 0, 
-            
           }}>
             <Paper sx={{ padding: 2 }} className="custom-scrollbar">
               <Typography variant="h6">Assets Bank</Typography>
               <TreeView tree={tree1} onDrop={handleDrop} rootId={100} deleteFolder={deleteFolder} treeData={treeData} onNameChange={handleNameChange} />
             </Paper>
           </Box>
+
+          {/* BOX 2 */}
           <Box className="nwb-grow-box">
             <Paper sx={{ padding: 2 }}>
               <Typography variant="h6">Assets</Typography>
-              <TreeView 
-                tree={tree2} 
-                onDrop={handleDrop} 
-                rootId={200} 
-                deleteFolder={deleteFolder} 
-                treeData={treeData}
-                onNameChange={handleNameChange}
-              />
+              <TreeView tree={tree2} onDrop={handleDrop} rootId={200} deleteFolder={deleteFolder} treeData={treeData} onNameChange={handleNameChange} />
             </Paper>
           </Box>
         </Box>
 
 
+
+
+
+        {/* BOTTOM BOXES */}
         <Box sx={{ display: 'flex', flexDirection: 'row', marginBottom: 2 }}>
 
+          {/* BOX 3 */}
           <Box className={`nwb-transition-box ${showLeftBoxes ? 'nwb-box' : ''}`} sx={{ 
             opacity: showLeftBoxes ? 1 : 0,
             width: showLeftBoxes ? '50%' : '0%',
@@ -436,6 +465,8 @@ const NetWorthBoard = () => {
               <TreeView tree={tree3} onDrop={handleDrop} rootId={300} deleteFolder={deleteFolder} treeData={treeData} onNameChange={handleNameChange} />
             </Paper>
           </Box>
+
+          {/* BOX 4 */}
           <Box className="nwb-grow-box">
             <Paper sx={{ padding: 2 }}>
               <Typography variant="h6">Liabilities</Typography>
@@ -444,19 +475,48 @@ const NetWorthBoard = () => {
           </Box>
         </Box>
 
-        <Box>
-          <Paper sx={{ padding: 2 }}>
-            <Typography variant="h4">Net Worth</Typography>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography variant="h6" sx={{ color: 'green' }}>Assets: {assetValues}</Typography>
-              <Typography variant="h6" sx={{ color: 'red' }}>Liabilities: {liabilities}</Typography>
-              <Typography variant="h6" sx={{ color: parseInt(netWorth) > 0 ? 'green' : 'red' }}>Net Worth: {netWorth}</Typography>
+
+
+
+
+
+
+
+
+        {/* NET WORTH BOX */}
+        <Box sx={{ textAlign: 'center', margin: 2 }}>
+          <Paper sx={{ padding: 3, borderRadius: 2, boxShadow: 3 }}>
+            <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#3f51b5' }}>Net Worth</Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-around', marginTop: 2 }}>
+              <Typography variant="h6" sx={{ color: 'green', fontWeight: 'medium' }}>Assets: <span style={{ fontWeight: 'bold' }}>{assetValues}</span></Typography>
+              <Typography variant="h6" sx={{ color: 'red', fontWeight: 'medium' }}>Liabilities: <span style={{ fontWeight: 'bold' }}>{liabilities}</span></Typography>
+              <Typography variant="h6" sx={{ color: parseInt(netWorth) > 0 ? 'green' : 'red', fontWeight: 'medium' }}>Net Worth: <span style={{ fontWeight: 'bold' }}>{netWorth}</span></Typography>
             </Box>
           </Paper>
         </Box>
-      </Box> 
-      
-      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      </Box>
+
+
+
+
+
     </Box>
   );
 };

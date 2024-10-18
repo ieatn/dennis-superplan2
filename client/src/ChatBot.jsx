@@ -121,7 +121,7 @@ export default function Chatbot({ clientId }) {
         open={drawerOpen}
         onClose={toggleDrawer}
       >
-        <Box sx={{ width: 250, p: 2 }}>
+        <Box sx={{ width: 350, p: 4 }}>
           <Typography variant="h6" sx={{ mb: 2 }}>Database Prompts</Typography>
           {[
             "How many tables are there in the database?",

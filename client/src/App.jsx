@@ -4,7 +4,7 @@ import { Link, Outlet } from 'react-router-dom';
 import "./App.css";
 
 const Home = () => (
-  <Box sx={{ my: 4, textAlign: 'center' }}>
+  <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: `calc(100vh - ${64}px)`, textAlign: 'center' }}>
     <Typography variant="h2" gutterBottom>Welcome to SuperPlan</Typography>
     <Typography variant="h5" gutterBottom>Plan your projects with ease and efficiency</Typography>
     <Button variant="contained" size="large" sx={{ mt: 2 }} component={Link} to="/clients">Get Started</Button>
