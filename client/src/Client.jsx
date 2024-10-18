@@ -4,12 +4,13 @@ import { Container, Typography, Paper, Fab, Dialog, DialogTitle, DialogContent, 
 import ChatIcon from '@mui/icons-material/Chat';
 import FolderIcon from '@mui/icons-material/Folder';
 import { API_URL } from './config.jsx';
+import ChatBot from './ChatBot.jsx';
 
 const Client = () => {
   const { id } = useParams();
   const location = useLocation();
   const { name } = location.state || {};
-  const [chatOpen, setChatOpen] = useState(false);
+  const [chatVisible, setChatVisible] = useState(false);
   const [folders, setFolders] = useState([]);
   
 
@@ -30,8 +31,8 @@ const Client = () => {
     fetchFolders(id);
   }, [id]);
 
-  const handleChatOpen = () => {
-    setChatOpen(true);
+  const handleChatToggle = () => {
+    setChatVisible((prev) => !prev);
   };
 
   return (
@@ -78,12 +79,11 @@ const Client = () => {
           </Button>
         </Link>
       </Paper>
-
-      {/* Chatbot Fab Button */}
+      {/* Chatbot Fab Button or Placeholder */}
       <Fab
         color="primary"
         aria-label="chat"
-        onClick={handleChatOpen}
+        onClick={() => setChatVisible((prev) => !prev)}
         sx={{
           position: 'fixed',
           bottom: 16,
@@ -93,17 +93,22 @@ const Client = () => {
         <ChatIcon />
       </Fab>
 
-      {/* Chatbot Dialog */}
-      <Dialog open={chatOpen} onClose={() => setChatOpen(false)}>
-        <DialogTitle>Chat with us</DialogTitle>
-        <DialogContent>
-          {/* Add your chatbot content here */}
-          <Typography>This is where your chatbot interface would go.</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setChatOpen(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
+      {/* Chatbot Popup */}
+      {chatVisible && (
+        <div style={{
+          position: 'fixed',
+          bottom: 80,
+          right: 16,
+          width: '600px',
+          height: '700px',
+          backgroundColor: 'white',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+          borderRadius: '8px',
+          zIndex: 1000,
+        }}>
+          <ChatBot clientId={id} />
+        </div>
+      )}
     </Container>
   );
 };
