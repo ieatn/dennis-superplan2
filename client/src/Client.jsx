@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
-import { Container, Typography, Paper, Fab, Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid, List, ListItem, Checkbox, ListItemText } from '@mui/material';
+import { Box, Container, Typography, Paper, Fab, Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid, List, ListItem, Checkbox, ListItemText } from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
 import FolderIcon from '@mui/icons-material/Folder';
 import { API_URL } from './config.jsx';
@@ -285,12 +285,25 @@ const Client = () => {
       <>
         {showDifferences && (
           <div style={{ marginTop: '10px' }}>
-            <h6 style={{ fontSize: '20px', margin: '5px 0' }}>
+            <h6 style={{ fontSize: '20px', margin: '5px 0', textAlign: 'center' }}>
               Folder Differences
             </h6>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+            <Box 
+              sx={{ 
+                display: 'flex', 
+                maxWidth: '800px', 
+                margin: 'auto', 
+                justifyContent: 'space-between', 
+                marginBottom: '10px', 
+                padding: 2, 
+                border: '1px solid #ccc', 
+                borderRadius: '8px', 
+                backgroundColor: '#f9f9f9', 
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' 
+              }}
+            >
               <div>
-                {folderDifferences.added.length > 0 && (
+                {folderDifferences.added && folderDifferences.added.length > 0 && (
                   <>
                     <h6 style={{ fontSize: '18px', margin: '5px 0', color: 'green' }}>
                       Added:
@@ -306,7 +319,7 @@ const Client = () => {
                 )}
               </div>
               <div>
-                {folderDifferences.removed.length > 0 && (
+                {folderDifferences.removed && folderDifferences.removed.length > 0 && (
                   <>
                     <h6 style={{ fontSize: '18px', margin: '5px 0', color: 'red' }}>
                       Removed:
@@ -321,7 +334,7 @@ const Client = () => {
                   </>
                 )}
               </div>
-            </div>
+            </Box>
             <Button
               onClick={() => setShowDifferences(false)}
               variant="contained"
@@ -350,22 +363,54 @@ const Client = () => {
       <Typography variant="h4" component="h2" gutterBottom>
         Client Details
       </Typography>
-      <Paper elevation={3} sx={{ padding: 2 }}>
-        <Typography variant="h6">Client ID: {id}</Typography>
-        <Typography>Name: {name || 'Unknown'}</Typography>
-        {/* Add more client details as needed */}
-        <Link to={`/card-game-board`} state={{ clientId: id }}>
-          <Button variant="contained" color="primary">
-            Card Game
-          </Button>
-        </Link>
-        <Link to={`/questionnaire`} state={{ clientId: id }}>
-          <Button variant="contained" color="primary">
-            Questionnaire
-          </Button>
-        </Link>
+      <Paper elevation={3} sx={{ padding: 4 }}>
+        <div style={{ marginBottom: '24px' }}>
+          <Typography variant="h6">Client ID: {id}</Typography>
+        </div>
+        <div style={{ marginBottom: '24px' }}>
+          <Typography variant="h6">Name: {name || 'Unknown'}</Typography>
+        </div>
+        <div>
+          <Link to={`/card-game-board`} state={{ clientId: id }} style={{ marginRight: '20px' }}>
+            <Button variant="contained" color="primary">
+              Card Game
+            </Button>
+          </Link>
+          <Link to={`/questionnaire`} state={{ clientId: id }}>
+            <Button variant="contained" color="primary">
+              Questionnaire
+            </Button>
+          </Link>
+        </div>
       </Paper>
-      {/* Chatbot Fab Button or Placeholder */}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      {/* chatbot button */}
       <Fab
         color="primary"
         aria-label="chat"
@@ -378,7 +423,6 @@ const Client = () => {
       >
         <ChatIcon />
       </Fab>
-
       {/* Chatbot Popup */}
       {chatVisible && (
         <div style={{

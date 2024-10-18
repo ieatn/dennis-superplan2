@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Button, Typography } from "@mui/material";
+import { Button, Typography, Box, TextField, Paper, Drawer } from "@mui/material";
 
 export default function Chatbot({ clientId }) {
   const [mode, setMode] = useState("database"); // Default mode is database
   const messagesEndRef = useRef(null); // Reference to the end of the messages container
   const [chatMessages, setChatMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
     // Scroll to the bottom of the chat messages
@@ -63,51 +64,87 @@ export default function Chatbot({ clientId }) {
     handleSendMessage(text); // Directly send the message text
   };
 
+  const toggleDrawer = () => {
+    setDrawerOpen(!drawerOpen);
+  };
+
   return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', padding: '20px', backgroundColor: '#f0f0f0', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
-      <h3 style={{ marginBottom: '20px', textAlign: 'center' }}>Chatbot</h3>
+    <Paper elevation={3} sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', p: 3, bgcolor: '#f8f9fa', borderRadius: 2, overflow: 'hidden' }}>
+      <Typography variant="h5" sx={{ mb: 2, textAlign: 'center', fontWeight: 'bold' }}>Chatbot</Typography>
 
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
-        {["chat", "database"].map((modeType) => (
-          <Button
-            key={modeType}
-            variant={mode === modeType ? "contained" : "outlined"}
-            size="small"
-            onClick={() => handleModeSwitch(modeType)}
-            sx={{ mx: 1, bgcolor: mode === modeType ? "primary.main" : "transparent", color: mode === modeType ? "white" : "#607d8b" }}
-          >
-            {`${modeType.charAt(0).toUpperCase() + modeType.slice(1)} Mode`}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+        <Box>
+          {["chat", "database"].map((modeType) => (
+            <Button
+              key={modeType}
+              variant={mode === modeType ? "contained" : "outlined"}
+              size="small"
+              onClick={() => handleModeSwitch(modeType)}
+              sx={{ mr: 1 }}
+            >
+              {`${modeType.charAt(0).toUpperCase() + modeType.slice(1)} Mode`}
+            </Button>
+          ))}
+        </Box>
+        {mode === "database" && (
+          <Button variant="outlined" size="small" onClick={toggleDrawer}>
+            Show Prompts
           </Button>
-        ))}
-      </div>
+        )}
+      </Box>
 
-      <div style={{ overflowY: 'auto', height: '400px', border: '1px solid #ccc', borderRadius: '4px', padding: '10px', backgroundColor: 'white' }}>
+      <Box sx={{ flexGrow: 1, overflowY: 'auto', mb: 2, p: 2, bgcolor: 'white', borderRadius: 1, boxShadow: 1 }}>
         {chatMessages.map((message, index) => (
-          <Typography key={index} variant="body1" style={{ fontSize: "1.1rem", marginBottom: "0.5rem", fontFamily: "sans-serif" }}>
+          <Typography key={index} variant="body1" sx={{ mb: 1, fontFamily: 'sans-serif' }}>
             {message}
           </Typography>
         ))}
         <div ref={messagesEndRef} />
-      </div>
-      <textarea
-        value={inputValue}
-        onChange={handleInputChange}
-        onKeyDown={handleKeyPress}
-        placeholder="Type your message..."
-        style={{ width: '100%', marginTop: '10px', padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
-        rows={1}
-      />
-      <Button onClick={() => handleSendMessage()} style={{ marginTop: '10px' }}>Send</Button>
+      </Box>
 
-      {mode === "database" && (
-        <div style={{ marginTop: '20px' }}>
-          {["How many tables are there in the database?", "How many records are in the assets table?", `How many assets are in the folder Q4 2022 with the folder id of ${clientId}?`, `How many assets with the same name are in the folder Q4 2022 with the folder id of ${clientId} that are in the folder Q4 2023 with the folder id of ${clientId}?`, `What assets are different between 2 folders?`].map((text, index) => (
-            <div key={index} onClick={() => handlePromptClick(text)} style={{ cursor: 'pointer', padding: '10px', border: '1px solid #ccc', borderRadius: '4px', margin: '5px 0', backgroundColor: '#e0e0e0', textAlign: 'center' }}>
+      <Box sx={{ display: 'flex', gap: 2 }}>
+        <TextField
+          value={inputValue}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyPress}
+          placeholder="Type your message..."
+          multiline
+          rows={1}
+          fullWidth
+          variant="outlined"
+        />
+        <Button variant="contained" onClick={() => handleSendMessage()}>Send</Button>
+      </Box>
+
+      <Drawer
+        anchor="right"
+        open={drawerOpen}
+        onClose={toggleDrawer}
+      >
+        <Box sx={{ width: 250, p: 2 }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>Database Prompts</Typography>
+          {[
+            "How many tables are there in the database?",
+            "How many records are in the assets table?",
+            `How many assets are in the folder Q4 2022 with the folder id of ${clientId}?`,
+            `How many assets with the same name are in the folder Q4 2022 with the folder id of ${clientId} that are in the folder Q4 2023 with the folder id of ${clientId}?`,
+            `What assets are different between 2 folders?`
+          ].map((text, index) => (
+            <Button
+              key={index}
+              onClick={() => {
+                handlePromptClick(text);
+                toggleDrawer();
+              }}
+              variant="outlined"
+              fullWidth
+              sx={{ mb: 1 }}
+            >
               {text}
-            </div>
+            </Button>
           ))}
-        </div>
-      )}
-    </div>
+        </Box>
+      </Drawer>
+    </Paper>
   );
 }
