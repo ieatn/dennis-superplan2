@@ -6,10 +6,14 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { IconButton } from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from "@mui/material";
+import EditIcon from '@mui/icons-material/Edit';
 
 export const CustomNode = (props) => {
   const { droppable, data } = props.node;
   const [folderTotal, setFolderTotal] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newName, setNewName] = useState(props.node.text);
 
   const handleToggle = (e) => {
     e.stopPropagation();
@@ -134,6 +138,21 @@ export const CustomNode = (props) => {
     }, 0);
   };
 
+  const handleOpenModal = (e) => {
+    e.stopPropagation();
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setNewName(props.node.text);
+  };
+
+  const handleNameChange = () => {
+    props.onNameChange(props.node.id, newName);
+    setIsModalOpen(false);
+  };
+
   return (
     <div
       style={{ ...rootStyle, paddingInlineStart: props.depth * 36 }} 
@@ -147,7 +166,10 @@ export const CustomNode = (props) => {
         <div className="type-icon" style={filetypeStyle}>
           <TypeIcon droppable={droppable} />
         </div>
-        <div className="node-text" style={nodeTextStyle}>{props.node.text}</div>
+        <div className="node-text" style={nodeTextStyle} onClick={handleOpenModal}>{props.node.text}</div>
+        <IconButton size="small" onClick={handleOpenModal}>
+          <EditIcon fontSize="small" />
+        </IconButton>
         {droppable && props.node.id !== props.rootId && (
           <IconButton size="small" onClick={handleDelete}>
             <DeleteIcon fontSize="small" />
@@ -174,6 +196,25 @@ export const CustomNode = (props) => {
           </span>
         )}
       </div>
+
+      <Dialog open={isModalOpen} onClose={handleCloseModal}>
+        <DialogTitle>Change Name</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="New Name"
+            type="text"
+            fullWidth
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseModal}>Cancel</Button>
+          <Button onClick={handleNameChange}>Save</Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

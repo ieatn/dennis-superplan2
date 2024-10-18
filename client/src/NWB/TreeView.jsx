@@ -19,6 +19,7 @@ export const TreeView = (props) => (
         rootId={props.rootId}
         deleteFolder={props.deleteFolder}
         treeData={props.treeData}
+        onNameChange={props.onNameChange}
         // depth={depth}
         // isOpen={isOpen}
         // onToggle={onToggle}

@@ -289,6 +289,14 @@ const NetWorthBoard = () => {
     setIsUpdating(false);
   };
 
+  const handleNameChange = (id, newName) => {
+    setTreeData((prevTreeData) =>
+      prevTreeData.map((node) =>
+        node.id === id ? { ...node, text: newName } : node
+      )
+    );
+  };
+
   return (
     // Main Net Worth Board Box full screen
     <Box sx={{
@@ -397,7 +405,7 @@ const NetWorthBoard = () => {
           }}>
             <Paper sx={{ padding: 2 }} className="custom-scrollbar">
               <Typography variant="h6">Assets Bank</Typography>
-              <TreeView tree={tree1} onDrop={handleDrop} rootId={100} deleteFolder={deleteFolder} treeData={treeData} />
+              <TreeView tree={tree1} onDrop={handleDrop} rootId={100} deleteFolder={deleteFolder} treeData={treeData} onNameChange={handleNameChange} />
             </Paper>
           </Box>
           <Box className="nwb-grow-box">
@@ -409,6 +417,7 @@ const NetWorthBoard = () => {
                 rootId={200} 
                 deleteFolder={deleteFolder} 
                 treeData={treeData}
+                onNameChange={handleNameChange}
               />
             </Paper>
           </Box>
@@ -424,13 +433,13 @@ const NetWorthBoard = () => {
           }}>
             <Paper sx={{ padding: 2 }}  >
               <Typography variant="h6">Liabilities Bank</Typography>
-              <TreeView tree={tree3} onDrop={handleDrop} rootId={300} deleteFolder={deleteFolder} treeData={treeData} />
+              <TreeView tree={tree3} onDrop={handleDrop} rootId={300} deleteFolder={deleteFolder} treeData={treeData} onNameChange={handleNameChange} />
             </Paper>
           </Box>
           <Box className="nwb-grow-box">
             <Paper sx={{ padding: 2 }}>
               <Typography variant="h6">Liabilities</Typography>
-              <TreeView tree={tree4} onDrop={handleDrop} rootId={400} deleteFolder={deleteFolder} treeData={treeData} />
+              <TreeView tree={tree4} onDrop={handleDrop} rootId={400} deleteFolder={deleteFolder} treeData={treeData} onNameChange={handleNameChange} />
             </Paper>
           </Box>
         </Box>
