@@ -13,6 +13,8 @@ export default function Questionnaire() {
   const { questionnaireData, setQuestionnaireData } = useQuestionnaire();
   const [activeStep, setActiveStep] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [tempData, setTempData] = useState({});
 
   const questions = [
     { type: 'text', question: "What are your main concerns?", key: 'question1' },
@@ -254,6 +256,24 @@ export default function Questionnaire() {
     }
   };
 
+  const handleEditToggle = () => {
+    if (isEditing) {
+      // If we're cancelling the edit, reset to original data
+      setQuestionnaireData({...tempData});
+    } else {
+      // If we're starting to edit, save the current state
+      setTempData({...questionnaireData});
+    }
+    setIsEditing(!isEditing);
+  };
+
+  const handleTempAnswer = (key, value) => {
+    setQuestionnaireData(prevData => ({
+      ...prevData,
+      [key]: value
+    }));
+  };
+
   const renderSummary = () => (
     <Paper elevation={3} sx={{ p: 3, mt: 2, maxHeight: '600px', overflowY: 'auto' }}>
       <Typography variant="h6" gutterBottom>Summary</Typography>
@@ -263,17 +283,64 @@ export default function Questionnaire() {
             <ListItemText
               primary={q.question}
               secondary={
-                Array.isArray(questionnaireData[q.key])
-                  ? questionnaireData[q.key].join(', ')
-                  : questionnaireData[q.key]
+                <Box>
+                  {isEditing ? (
+                    q.type === 'text' ? (
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        value={questionnaireData[q.key] || ''}
+                        onChange={(e) => handleTempAnswer(q.key, e.target.value)}
+                        margin="normal"
+                      />
+                    ) : (
+                      <FormGroup>
+                        {q.options.map((option) => (
+                          <FormControlLabel
+                            key={option}
+                            control={
+                              <Checkbox
+                                checked={questionnaireData[q.key]?.includes(option) || false}
+                                onChange={(e) => {
+                                  const newAnswer = e.target.checked
+                                    ? [...(questionnaireData[q.key] || []), option]
+                                    : (questionnaireData[q.key] || []).filter(item => item !== option);
+                                  handleTempAnswer(q.key, newAnswer);
+                                }}
+                              />
+                            }
+                            label={option}
+                          />
+                        ))}
+                      </FormGroup>
+                    )
+                  ) : (
+                    <Typography>
+                      {q.type === 'text' 
+                        ? questionnaireData[q.key] 
+                        : questionnaireData[q.key]?.join(', ')}
+                    </Typography>
+                  )}
+                </Box>
               }
             />
           </ListItem>
         ))}
       </List>
-      <Button variant="outlined" color="secondary" onClick={handleDelete}>
-        Delete
-      </Button>
+      
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Button variant="outlined" color="error" onClick={handleDelete}>
+          Delete
+        </Button>
+
+        <Button 
+            variant="contained" 
+            color={isEditing ? "secondary" : "primary"} 
+            onClick={handleEditToggle}
+          >
+            {isEditing ? "Cancel Edit" : "Edit Answers"}
+        </Button>
+      </div>
     </Paper>
   );
 
